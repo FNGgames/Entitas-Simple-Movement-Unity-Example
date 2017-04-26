@@ -29,49 +29,24 @@ public class EmitInputSystem : IInitializeSystem, IExecuteSystem
 
         // left mouse button
         if (Input.GetMouseButtonDown(0))
-            AddOrReplaceMouseDown(_leftMouseEntity, mousePosition);
+            _leftMouseEntity.ReplaceMouseDown(mousePosition);
         
         if (Input.GetMouseButton(0))
-            AddOrReplaceMousePosition(_leftMouseEntity, mousePosition);
+            _leftMouseEntity.ReplaceMousePosition(mousePosition);
         
         if (Input.GetMouseButtonUp(0))
-            AddOrReplaceMouseUp(_leftMouseEntity, mousePosition);
+            _leftMouseEntity.ReplaceMouseUp(mousePosition);
         
 
         // left mouse button
         if (Input.GetMouseButtonDown(1))
-            AddOrReplaceMouseDown(_rightMouseEntity, mousePosition);
+            _rightMouseEntity.ReplaceMouseDown(mousePosition);
         
         if (Input.GetMouseButton(1))
-            AddOrReplaceMousePosition(_rightMouseEntity, mousePosition);
+            _rightMouseEntity.ReplaceMousePosition(mousePosition);
         
         if (Input.GetMouseButtonUp(1))
-            AddOrReplaceMouseUp(_rightMouseEntity, mousePosition);
+            _rightMouseEntity.ReplaceMouseUp(mousePosition);
         
-    }
-
-    // Add or replace the components
-    private void AddOrReplaceMouseDown(InputEntity e, Vector2 mousePosition)
-    {
-        if (e.hasMouseDown)
-            e.ReplaceMouseDown(mousePosition);
-        else
-            e.AddMouseDown(mousePosition);
-    }
-
-    private void AddOrReplaceMousePosition(InputEntity e, Vector2 mousePosition)
-    {
-        if (e.hasMousePosition)
-            e.ReplaceMousePosition(mousePosition);
-        else
-            e.AddMousePosition(mousePosition);
-    }
-
-    private void AddOrReplaceMouseUp(InputEntity e, Vector2 mousePosition)
-    {
-        if (e.hasMouseUp)
-            e.ReplaceMouseUp(mousePosition);
-        else
-            e.AddMouseUp(mousePosition);
     }
 }
