@@ -9,7 +9,7 @@ public class CommandMoveSystem : ReactiveSystem<InputEntity>
 
     public CommandMoveSystem(Contexts contexts) : base(contexts.input)
     {
-        _movers = contexts.game.GetGroup(GameMatcher.Mover);
+        _movers = contexts.game.GetGroup(GameMatcher.AllOf(GameMatcher.Mover).NoneOf(GameMatcher.Move));
     }
 
     protected override Collector<InputEntity> GetTrigger(IContext<InputEntity> context)
