@@ -348,7 +348,7 @@ public class MoveSystem : IExecuteSystem, ICleanupSystem
 }
 ```
 
-*MovementSystems,cs (feature)*
+*MovementSystems.cs* (feature)
 ```csharp
 using Entitas;
 
