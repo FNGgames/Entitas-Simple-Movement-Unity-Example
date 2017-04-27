@@ -156,6 +156,8 @@ public class AddViewSystem : ReactiveSystem<GameEntity>
 }
 ```
 
+### RenderSpriteSystem
+
 With the `GameObject`s in place, we can handle the sprites. This system reacts to the `SpriteComponent` being added, just as the above one does, only this time we filter for only those entities that *have* already had a `ViewComponent` added. If the entity has a `ViewComponent` we know it also has a `GameObject` which we can access and add or replace its `SpriteRenderer`.
 
 *RenderSpriteSystem.cs*
@@ -194,6 +196,8 @@ public class RenderSpriteSystem : ReactiveSystem<GameEntity>
 }
 ```
 
+### RenderPositionSystem
+
 Next we want to make sure the position of the `GameObject` is the same as the value of `PositionComponent`. To do this we create a system that reacts to `PositionComponent`. We check in the filter that the entity also has a `ViewComponent`, since we will need to access its `GameObject` to move it.
 
 *RenderPositionSystem.cs*
@@ -226,6 +230,8 @@ public class RenderPositionSystem : ReactiveSystem<GameEntity>
     }
 }
 ```
+
+### RenderDirectionSystem
 
 Finally we want to rotate the GameObject to reflect the value of the `DirectionComponent` of an entity. In this case we react to `DirectionComponent` and filter for `entity.hasView`. The code within the execute block is a simple method of converting degree angles to `Quaternion` rotations which can be applied to Unity `GameObject` `Transform`s.
 
@@ -264,6 +270,8 @@ public class RenderDirectionSystem : ReactiveSystem<GameEntity>
     }
 }
 ```
+
+### ViewSystems (Feature)
 
 We will now put all of these systems inside a `Feature` for organisation. This will give use better visual debugging of the systems in the inspector, and simplify our GameController.
 
