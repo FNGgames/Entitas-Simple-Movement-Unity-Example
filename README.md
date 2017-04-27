@@ -291,4 +291,78 @@ public class ViewSystems : Feature
 }
 ```
 
+## Step 5 - Movement Systems
+
+We will now write a simple system to get AI entities to move to supplied target locations automatically. The desired behaviour is that the entity will turn to face the supplied movement target and then move towards it at a constant speed. When it reaches the target it should stop, and it's movement order should be removed.
+
+We will acheive this with an Execute system that runs every frame. We can keep an up to date list of all the GameEntities that have a `MoveComponent` using the Group functionality. We'll set this up in the constructor then keep a readonly reference to the group in the system for later use. We can get the list of entities by calling `group.GetEntities()`.
+
+We use the `MoveCompleteComponent` as a flag to show that the movement was completed by actually reaching a target. If we didn't use this flag, we could use `GroupEvent.Removed` instead, and remove the need for the extra flag component, but this leaves us no ability to distinguish between a successfully completed movement and a prematurely cancelled movement. In either case, we will not react to completed moves in this example, but if we set it up like this, you can choose to add that functionality later on without needing to come back and alter this code.
+
+The `Execute()` method will take every entity with a `PositionComponent` and a `MoveComponent` and adjust it's position by a fixed amount in the direction of its move target. If the entity is within range of the target, the move is considered complete. We will also cleaup all the `MoveCompleteComponent`s during the cleanup phase of the system (which runs after every system has finished its execute phase). The cleanup part ensures that `MoveCompleteComponent` only flags entities that have completed their movement within *one frame* and not ones who finished a long time ago and who are waiting for new movement commands.
+
+*MoveSystem.cs*
+```csharp
+using Entitas;
+using UnityEngine;
+
+public class MoveSystem : IExecuteSystem, ICleanupSystem
+{
+    readonly IGroup<GameEntity> _moves;
+    readonly IGroup<GameEntity> _moveCompletes;
+    const float _speed = 4f;
+
+    public MoveSystem(Contexts contexts)
+    {
+        _moves = contexts.game.GetGroup(GameMatcher.Move);
+        _moveCompletes = contexts.game.GetGroup(GameMatcher.MoveComplete);
+    }
+
+    public void Execute()
+    {
+        foreach (GameEntity e in _moves.GetEntities())
+        {
+            Vector2 dir = e.move.target - e.position.value;
+            Vector2 newPosition = e.position.value + dir.normalized * _speed * Time.deltaTime;
+            e.ReplacePosition(newPosition);
+
+            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            e.ReplaceDirection(angle);
+
+            float dist = dir.magnitude;
+            if (dist <= 0.5f)
+            {
+                e.RemoveMove();
+                e.isMoveComplete = true;
+            }
+        }
+    }
+
+    public void Cleanup()
+    {
+        foreach (GameEntity e in _moveCompletes.GetEntities())
+        {
+            e.isMoveComplete = false;
+        }
+    }
+}
+```
+
+*MovementSystems,cs (feature)*
+```csharp
+using Entitas;
+
+public class MovementSystems : Feature
+{
+    public MovementSystems(Contexts contexts) : base("Movement Systems")
+    {
+        Add(new MoveSystem(contexts));
+    }
+}
+```
+
+
+
+
+
 
