@@ -532,6 +532,48 @@ public class InputSystems : Feature
 }
 ```
 
+## Step 7 - Game Controller
+
+Now we need to create thee game controller to initialise and activate the game. The concept of the GameController should be familiar to you by now, but if not please re-visit [Hello World]9https://github.com/sschmid/Entitas-CSharp/wiki/Unity-Tutorial-Hello-World) to get a description. Once this script has been saved, create an empty game object in your unity heirarchy and attach this script to it. 
+
+You may need to adjust your sprite import settings, and camera settings to get the sprites to look the way you want them to look on screen. The finished example project sets the camera's orthographic size to 10 and the background to solid grey. Your sprite should also face vertically up so as to make sure the direction is properly rendered.
+
+*GameController.cs*
+```csharp
+using Entitas;
+using UnityEngine;
+
+public class GameController : MonoBehaviour
+{
+    private Systems _systems;
+    private Contexts _contexts;
+
+    void Start()
+    {
+        _contexts = Contexts.sharedInstance;
+        _systems = CreateSystems(_contexts);
+        _systems.Initialize();
+    }
+
+    void Update()
+    {
+        _systems.Execute();
+        _systems.Cleanup();
+    }
+
+    private static Systems CreateSystems(Contexts contexts)
+    {
+        return new Feature("Systems")
+            .Add(new InputSystems(contexts))
+            .Add(new MovementSystems(contexts))
+            .Add(new ViewSystems(contexts));
+    }
+}
+```
+
+## Step 8 - Run the game
+
+Save, compile and run your game from the Unity editor. Right-clicking on the screen should create objects displaying your sprite at the position on the screen which you clicked. Left clicking should send them moving towards the psotiion on the screen which you clicked. Notice their direction updating to aim them towards their target point. When they reach the target position they will stop moving and again become available for movement assignments.
 
 
 
