@@ -363,9 +363,10 @@ public class MovementSystems : Feature
 
 ## Step 6 - Input Systems
 
-Here we're going to introduce a way to push mouse input from unity into Entitas in a flexible way that allows multiple systems to interact with the mouse input in different ways. Unity provides three distinct mouse button states for eeach button (i.e. `GetMouseButtonDown()`, `GetMouseButtonUp()` and `GetMouseButton()`). We have defined components for each of these events `MouseDownComponent`, `MouseUpComponent`, and `MousePositionComponent`. Our goal is to push data from Unity to our components so we can use them with Entitas systems.
+Our goal is to allow the user to create AI ageents with a right mouse cliock and command them to move using the left mouse click. We're going to introduce a way to push mouse input from unity into Entitas in a flexible way that allows multiple systems to interact with the mouse input in different ways. Unity provides three distinct mouse button states for eeach button (i.e. `GetMouseButtonDown()`, `GetMouseButtonUp()` and `GetMouseButton()`). We have defined components for each of these events `MouseDownComponent`, `MouseUpComponent`, and `MousePositionComponent`. Our goal is to push data from Unity to our components so we can use them with Entitas systems.
 
 We have also define two *unique* flag components, one for left mouse button and one for right mouse button. Since they are marked as unique we can access them directly from the context. By calling `_inputContext.isLeftMouse = true` we can create a unique entity for the left mouse button. Just like any other entity, we can add or remove other component to them. Because they are *unique* we can access these entities using `_inputcontext.LeftMouseEntity` and `_inputcontext.rightMouseEntity`. Both of these Entities can then carry one of each of the three mouse components, up, down and position.
+
 
 ### EmitInputSystem
 
