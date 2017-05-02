@@ -361,7 +361,176 @@ public class MovementSystems : Feature
 }
 ```
 
+## Step 6 - Input Systems
 
+Here we're going to introduce a way to push mouse input from unity into Entitas in a flexible way that allows multiple systems to interact with the mouse input in different ways. Unity provides three distinct mouse button states for eeach button (i.e. `GetMouseButtonDown()`, `GetMouseButtonUp()` and `GetMouseButton()`). We have defined components for each of these events `MouseDownComponent`, `MouseUpComponent`, and `MousePositionComponent`. Our goal is to push data from Unity to our components so we can use them with Entitas systems.
+
+We have also define two *unique* flag components, one for left mouse button and one for right mouse button. Since they are marked as unique we can access them directly from the context. By calling `_inputContext.isLeftMouse = true` we can create a unique entity for the left mouse button. Just like any other entity, we can add or remove other component to them. Because they are *unique* we can access these entities using `_inputcontext.LeftMouseEntity` and `_inputcontext.rightMouseEntity`. Both of these Entities can then carry one of each of the three mouse components, up, down and position.
+
+### EmitInputSystem
+
+This is an execute system which polls Unity's `Input` class each frame and replaces components on the unique left and right mouse button entities when the corresponding buttons are pressed. We will use the Initialize phase of the system to set up the two unique entities and the execute phase to set their components.
+
+*EmitInputSystem.cs*
+
+```csharp
+using Entitas;
+using UnityEngine;
+
+public class EmitInputSystem : IInitializeSystem, IExecuteSystem
+{
+    readonly InputContext _context;
+    private InputEntity _leftMouseEntity;
+    private InputEntity _rightMouseEntity;
+
+    public EmitInputSystem(Contexts contexts)
+    {
+        _context = contexts.input;
+    }
+
+    public void Initialize()
+    {
+        // initialise the unique entities that will hold the mousee button data
+        _context.isLeftMouse = true;
+        _leftMouseEntity = _context.leftMouseEntity;
+
+        _context.isRightMouse = true;
+        _rightMouseEntity = _context.rightMouseEntity;
+    }
+
+    public void Execute()
+    {
+        // mouse position
+        Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        // left mouse button
+        if (Input.GetMouseButtonDown(0))
+            _leftMouseEntity.ReplaceMouseDown(mousePosition);
+        
+        if (Input.GetMouseButton(0))
+            _leftMouseEntity.ReplaceMousePosition(mousePosition);
+        
+        if (Input.GetMouseButtonUp(0))
+            _leftMouseEntity.ReplaceMouseUp(mousePosition);
+        
+
+        // left mouse button
+        if (Input.GetMouseButtonDown(1))
+            _rightMouseEntity.ReplaceMouseDown(mousePosition);
+        
+        if (Input.GetMouseButton(1))
+            _rightMouseEntity.ReplaceMousePosition(mousePosition);
+        
+        if (Input.GetMouseButtonUp(1))
+            _rightMouseEntity.ReplaceMouseUp(mousePosition);
+        
+    }
+}
+```
+
+### CreateMoverSystem
+
+We'll need some "movers" to carry out the movement. These will be entities that carry the "Mover" flag component, a `PositionComponent`, a `DirectionComponent` and will be displayed on screen with a `SpriteComponent`. The sprite in the complete project is called "Bee". Feel free to replace this with a sprite of your own as you follow along.
+
+This system will react to the right mosue button being clicked. For this we want the collector to match all of `RightMouseComponent` and `MouseDownComponent`. Remember, these get set in the `EmitInputSystem` when the user presses the right mouse button down.
+
+*CreateMoverSystem.cs*
+```csharp
+using System.Collections.Generic;
+using Entitas;
+using UnityEngine;
+
+public class CreateMoverSystem : ReactiveSystem<InputEntity>
+{
+    public CreateMoverSystem(Contexts contexts) : base(contexts.input)
+    {
+        _gameContext = contexts.game;
+    }
+
+    protected override Collector<InputEntity> GetTrigger(IContext<InputEntity> context)
+    {
+        return context.CreateCollector(InputMatcher.AllOf(InputMatcher.RightMouse, InputMatcher.MouseDown));
+    }
+
+    protected override bool Filter(InputEntity entity)
+    {
+        return entity.hasMouseDown;
+    }
+
+    protected override void Execute(List<InputEntity> entities)
+    {
+        foreach (InputEntity e in entities)
+        {
+            GameEntity mover = _gameContext.CreateEntity();
+            mover.isMover = true;
+            mover.AddPosition(e.mouseDown.position);
+            mover.AddDirection(Random.Range(0,360));
+            mover.AddSprite("Bee");
+        }
+    }
+}
+```
+
+### CommandMoveSystem
+
+We also need to be able to assign movement orders to our movers. To do this we'll react on left mouse button presses just as we reacted to right mouse button presses above. On execute we'll search the group of Movers who don't already have a movement order. To configure a group in this way we use `GetGroup(GameMatcher.AllOf(GameMatcher.Mover).NoneOf(GameMatcher.Move))`. That is all of the entities that are flagged as "Mover" that do not also have a `MoveComponent` attached.
+
+*CommandMoveSystem.cs*
+```csharp
+using System.Collections.Generic;
+using Entitas;
+using UnityEngine;
+
+public class CommandMoveSystem : ReactiveSystem<InputEntity>
+{
+    readonly GameContext _gameContext;
+    readonly IGroup<GameEntity> _movers;
+
+    public CommandMoveSystem(Contexts contexts) : base(contexts.input)
+    {
+        _movers = contexts.game.GetGroup(GameMatcher.AllOf(GameMatcher.Mover).NoneOf(GameMatcher.Move));
+    }
+
+    protected override Collector<InputEntity> GetTrigger(IContext<InputEntity> context)
+    {
+        return context.CreateCollector(InputMatcher.AllOf(InputMatcher.LeftMouse, InputMatcher.MouseDown));
+    }
+
+    protected override bool Filter(InputEntity entity)
+    {
+        return entity.hasMouseDown;
+    }
+
+    protected override void Execute(List<InputEntity> entities)
+    {
+        foreach (InputEntity e in entities)
+        {
+            GameEntity[] movers = _movers.GetEntities();
+            if (movers.Length <= 0) return;
+            movers[Random.Range(0, movers.Length)].ReplaceMove(e.mouseDown.position);
+        }
+    }
+}
+```
+
+### InputSystems (feature)
+
+The featuree that holds the above two systems will be called "InputSystems":
+
+*InputSystems.cs*
+```csharp
+using Entitas;
+
+public class InputSystems : Feature
+{
+    public InputSystems(Contexts contexts) : base("Input Systems")
+    {
+        Add(new EmitInputSystem(contexts));
+        Add(new CreateMoverSystem(contexts));
+        Add(new CommandMoveSystem(contexts));
+    }         
+}
+```
 
 
 
