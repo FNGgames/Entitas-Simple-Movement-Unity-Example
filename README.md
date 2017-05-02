@@ -301,6 +301,8 @@ The `Execute()` method will take every entity with a `PositionComponent` and a `
 
 We will also clean up all the `MoveCompleteComponent`s during the cleanup phase of the system (which runs after every system has finished its execute phase). The cleanup part ensures that `MoveCompleteComponent` only flags entities that have completed their movement within one frame and not ones who finished a long time ago and who are waiting for new movement commands.
 
+### MovementSystem
+
 *MoveSystem.cs*
 ```csharp
 using Entitas;
@@ -347,6 +349,10 @@ public class MoveSystem : IExecuteSystem, ICleanupSystem
     }
 }
 ```
+
+### MovementtSystems (feature)
+
+The feature that holds the above system will be called "MovementSystems":
 
 *MovementSystems.cs* (feature)
 ```csharp
@@ -516,7 +522,7 @@ public class CommandMoveSystem : ReactiveSystem<InputEntity>
 
 ### InputSystems (feature)
 
-The featuree that holds the above two systems will be called "InputSystems":
+The feature that holds the above two systems will be called "InputSystems":
 
 *InputSystems.cs*
 ```csharp
