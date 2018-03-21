@@ -30,14 +30,7 @@ public class CommandMoveSystem : ReactiveSystem<InputEntity>
             if (movers.Length <= 0) return;
 
             GameEntity mover = movers[Random.Range(0, movers.Length)];
-            if (mover.hasMove)
-            {
-                mover.ReplaceMove(e.mouseDown.position);
-            }
-            else
-            {
-                mover.AddMove(e.mouseDown.position);
-            }
+            mover.AddMove(e.mouseDown.position);
         }
     }
 }
