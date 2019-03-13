@@ -1,4 +1,5 @@
-# NOTE: Some API changes have been made since this tutorial was written. Most notably, the return type of GetTrigger methods has switched to use the interface `ICollector<GameEntity>` instead of the base class `Collector<GameEntity>` and the entity-link method no longer has a `Contexts` argument. The code in the repo is no longer maintained but the readme will stay up to date helping you quickly fix errors when you download the project.
+# NOTE: 
+Some API changes have been made since this tutorial was written. Most notably, the return type of GetTrigger methods has switched to use the interface `ICollector<GameEntity>` instead of the base class `Collector<GameEntity>` and the entity-link method no longer has a `Contexts` argument. The code in the repo is no longer maintained but the readme will stay up to date helping you quickly fix errors when you download the project.
 
 # Introduction
 
