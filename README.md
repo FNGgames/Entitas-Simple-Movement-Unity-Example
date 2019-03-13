@@ -1,3 +1,5 @@
+# NOTE: Some API changes have been made since this tutorial was written. Most notably, the return type of GetTrigger methods has switched to use the interface `ICollector<GameEntity>` instead of the base class `Collector<GameEntity>` and the entity-link method no longer has a `Contexts` argument. The code in the repo is no longer maintained but the readme will stay up to date helping you quickly fix errors when you download the project.
+
 # Introduction
 
 This tutorial you will show how to represent game state in Entitas (as components) and how to render that game state using Unity functionality (via systems). You'll also see how to pass Unity user-input into components that other systems can react to and carry out related game logic. Finally you'll implement a very simple AI system that allows entities to carry out movement commands issued by mouse clicks. 
